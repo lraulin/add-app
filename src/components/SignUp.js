@@ -33,11 +33,11 @@ class SignUpForm extends Component {
   }
 
   onSubmit = (event) => {
-    const (
+    const {
       username,
       email,
       passwordOne,
-    ) = this.state;
+    } = this.state;
 
     const {
       history,
@@ -46,6 +46,7 @@ class SignUpForm extends Component {
     auth.doCreateUserWithEmailAndPassword(email, passwordOne)
       .then(authUser => {
         this.setState(() => ({ ...INITIAL_STATE }));
+        history.push(routes.HOME);
       })
       .catch(error => {
         this.setState(byPropKey('error', error));
@@ -118,7 +119,7 @@ const SignUpLink = () =>
     <Link to={routes.SIGN_UP}>Sign Up</Link>
   </p>
 
-export default SignUpPage;
+export default withRouter(SignUpPage);
 
 export {
   SignUpForm,
