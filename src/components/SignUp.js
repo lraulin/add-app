@@ -1,8 +1,7 @@
-import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
-
-import { auth } from "../firebase";
-import * as routes from "../constants/routes";
+import React, { Component } from 'react';
+import { Link, withRouter } from 'react-router-dom';
+import { auth, db } from '../firebase';
+import * as routes from '../constants/routes';
 
 const SignUpPage = ({ history }) => (
   <div>
@@ -12,10 +11,10 @@ const SignUpPage = ({ history }) => (
 );
 
 const INITIAL_STATE = {
-  username: "",
-  email: "",
-  passwordOne: "",
-  passwordTwo: "",
+  username: '',
+  email: '',
+  passwordOne: '',
+  passwordTwo: '',
   error: null,
 };
 
@@ -30,19 +29,27 @@ class SignUpForm extends Component {
     };
   }
 
-  onSubmit = event => {
+  onSubmit = (event) => {
     const { username, email, passwordOne } = this.state;
 
     const { history } = this.props;
 
     auth
       .doCreateUserWithEmailAndPassword(email, passwordOne)
-      .then(authUser => {
-        this.setState(() => ({ ...INITIAL_STATE }));
-        history.push(routes.HOME);
+      .then((authUser) => {
+        // Create a user in your own accessible Firebase Database too
+        db
+          .doCreateUser(authUser.uid, username, email)
+          .then(() => {
+            this.setState(() => ({ ...INITIAL_STATE }));
+            history.push(routes.HOME);
+          })
+          .catch((error) => {
+            this.setState(byPropKey('error', error));
+          });
       })
-      .catch(error => {
-        this.setState(byPropKey("error", error));
+      .catch((error) => {
+        this.setState(byPropKey('error', error));
       });
 
     event.preventDefault();
@@ -51,43 +58,31 @@ class SignUpForm extends Component {
   render() {
     const { username, email, passwordOne, passwordTwo, error } = this.state;
 
-    const isInvalid =
-      passwordOne !== passwordTwo ||
-      passwordOne === "" ||
-      email === "" ||
-      username === "";
+    const isInvalid = passwordOne !== passwordTwo || passwordOne === '' || email === '' || username === '';
 
     return (
       <form onSubmit={this.onSubmit}>
         <input
           value={username}
-          onChange={event =>
-            this.setState(byPropKey("username", event.target.value))
-          }
+          onChange={(event) => this.setState(byPropKey('username', event.target.value))}
           type="text"
           placeholder="Full Name"
         />
         <input
           value={email}
-          onChange={event =>
-            this.setState(byPropKey("email", event.target.value))
-          }
+          onChange={(event) => this.setState(byPropKey('email', event.target.value))}
           type="text"
           placeholder="Email Address"
         />
         <input
           value={passwordOne}
-          onChange={event =>
-            this.setState(byPropKey("passwordOne", event.target.value))
-          }
+          onChange={(event) => this.setState(byPropKey('passwordOne', event.target.value))}
           type="password"
           placeholder="Password"
         />
         <input
           value={passwordTwo}
-          onChange={event =>
-            this.setState(byPropKey("passwordTwo", event.target.value))
-          }
+          onChange={(event) => this.setState(byPropKey('passwordTwo', event.target.value))}
           type="password"
           placeholder="Confirm Password"
         />
