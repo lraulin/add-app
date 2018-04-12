@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import withAuthorization from './withAuthorization';
-import { db } from '../firebase';
+import withAuthorization from 'components/auth/withAuthorization';
+import { db } from 'fb';
 
 class HomePage extends Component {
   constructor(props) {

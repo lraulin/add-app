@@ -1,8 +1,8 @@
 import React from 'react';
-import AuthUserContext from './AuthUserContext';
-import { PasswordForgetForm } from './PasswordForget';
-import PasswordChangeForm from './PasswordChange';
-import withAuthorization from './withAuthorization';
+import AuthUserContext from 'components/auth/AuthUserContext';
+import { PasswordForgetForm } from 'components/auth/PasswordForget';
+import PasswordChangeForm from 'components/auth/PasswordChange';
+import withAuthorization from 'components/auth/withAuthorization';
 
 const AccountPage = () => (
   <AuthUserContext.Consumer>
