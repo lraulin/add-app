@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
-import { dateStamp } from 'utils/utils';
+import { dateStamp } from 'utils';
+import { db, fb } from 'fb';
+import { auth } from 'fb/fb';
 
 export default class App extends Component {
   state = {
@@ -12,17 +14,22 @@ export default class App extends Component {
   };
 
   updateNewMeasurement(value) {
-    this.setState({ newMeasurement: parseInt(value) });
+    const newMeasurement = { ...this.state.newMeasurement };
+    newMeasurement.cm = parseInt(value, 10);
+    this.setState({ newMeasurement });
   }
 
   saveRecord() {
-    const newMeasurement = {
-      date: dateStamp(),
-      cm: this.state.cm,
-    };
+    const user = auth.currentUser.uid;
+    const newMeasurement = { ...this.state.newMeasurement };
+    newMeasurement.date = dateStamp();
+    console.log(newMeasurement.date);
+    newMeasurement.cm = this.state.cm;
     this.setState({ newMeasurement });
+
     console.log(this.state.newMeasurement.date);
     console.log(this.state.newMeasurement.cm);
+    db.doSaveWaistRecord(user, newMeasurement.date, newMeasurement.cm);
   }
 
   close = () => {
@@ -43,12 +50,12 @@ export default class App extends Component {
   getValidationState() {
     if (Number.isNaN(this.state.newMeasurement.cm)) return 'success';
     else return 'error';
-    return null;
   }
 
   handleChange(event) {
-    const newMeasurement
-    this.setState({ newMeasurement.cm: event.target.value });
+    const newMeasurement = { ...this.state.newMeasurement };
+    newMeasurement.cm = event.target.value;
+    this.setState({ newMeasurement });
   }
 
   render() {
@@ -63,7 +70,7 @@ export default class App extends Component {
               <ControlLabel>New Measurement</ControlLabel>
               <FormControl
                 type="number"
-                value={this.state.newMeasurement.cm}
+                inputRef={input => this.textInput = input}
                 placeholder="Enter Measurement"
                 onChange={(event) => this.updateNewMeasurement(event.target.value)}
               />
