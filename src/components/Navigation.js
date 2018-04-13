@@ -19,6 +19,9 @@ const NavigationAuth = () => (
       <Link to={routes.HOME}>Home</Link>
     </li>
     <li>
+      <Link to={routes.WAIST}>Waist</Link>
+    </li>
+    <li>
       <Link to={routes.ACCOUNT}>Account</Link>
     </li>
     <li>

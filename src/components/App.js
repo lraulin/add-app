@@ -9,6 +9,7 @@ import HomePage from 'components/Home';
 import AccountPage from 'components/Account';
 import * as routes from 'constants/routes';
 import withAuthentication from 'components/auth/withAuthentication';
+import WaistTracker from 'components/WaistTracker';
 
 const App = () => (
   <Router>
@@ -21,6 +22,7 @@ const App = () => (
       <Route exact={true} path={routes.PASSWORD_FORGET} component={() => <PasswordForgetPage />} />
       <Route exact={true} path={routes.HOME} component={() => <HomePage />} />
       <Route exact={true} path={routes.ACCOUNT} component={() => <AccountPage />} />
+      <Route exact={true} path={routes.WAIST} component={() => <WaistTracker />} />
     </div>
   </Router>
 );
