@@ -1,36 +1,40 @@
 import React, { Component } from 'react';
 import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
 import { dateStamp } from 'utils';
-import { db, fb } from 'fb';
-import { auth } from 'fb/fb';
+import { auth, db } from 'fb/fb';
 
 export default class App extends Component {
-  state = {
-    showAdd: false,
-    newMeasurement: {
-      date: '',
-      cm: '',
-    },
-  };
+  constructor() {
+    super();
+    this.state = {
+      user: '',
+      data: [],
+      showAdd: false,
+      newMeasurement: '',
+    }
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-  updateNewMeasurement(value) {
-    const newMeasurement = { ...this.state.newMeasurement };
-    newMeasurement.cm = parseInt(value, 10);
+  handleChange(value) {
+    console.log('handleChange: value = ' + value);
+    let newMeasurement = this.state.newMeasurement;
+    newMeasurement = parseInt(value, 10);
+    console.log('handleChange: newMeasurement = ' + newMeasurement);
     this.setState({ newMeasurement });
   }
 
-  saveRecord() {
+  handleSubmit(e) {
+    e.preventDefault();
     const user = auth.currentUser.uid;
-    const newMeasurement = { ...this.state.newMeasurement };
-    newMeasurement.date = dateStamp();
-    console.log(newMeasurement.date);
-    newMeasurement.cm = this.state.cm;
-    this.setState({ newMeasurement });
-
-    console.log(this.state.newMeasurement.date);
-    console.log(this.state.newMeasurement.cm);
-    db.doSaveWaistRecord(user, newMeasurement.date, newMeasurement.cm);
-  }
+    const date = dateStamp();
+    const newMeasurement = this.state.newMeasurement;
+    console.log(user)
+    console.log(date);
+    console.log(newMeasurement);
+    db.ref(`waist/${user}/${date}`).set({ cm: newMeasurement });
+    this.setState({ showAdd: false });
+  };
 
   close = () => {
     if (this.state.showAdd) {
@@ -48,15 +52,23 @@ export default class App extends Component {
   };
 
   getValidationState() {
-    if (Number.isNaN(this.state.newMeasurement.cm)) return 'success';
+    if (Number.isNaN(this.state.newMeasurement)) return 'success';
     else return 'error';
   }
 
-  handleChange(event) {
-    const newMeasurement = { ...this.state.newMeasurement };
-    newMeasurement.cm = event.target.value;
-    this.setState({ newMeasurement });
-  }
+  componentDidMount() {
+    const user = auth.currentUser.uid;
+    console.log('Component Did Mount!');
+    const itemsRef = db.ref(`waist/${user}`);
+    console.log(JSON.stringify(itemsRef));
+    itemsRef.on('value', (snapshot) => {
+      let items = snapshot.val();
+      let newState = [];
+      for (let item in items) {
+        console.log(JSON.stringify(item));
+      }
+    });
+  };
 
   render() {
     return (
@@ -72,7 +84,7 @@ export default class App extends Component {
                 type="number"
                 inputRef={input => this.textInput = input}
                 placeholder="Enter Measurement"
-                onChange={(event) => this.updateNewMeasurement(event.target.value)}
+                onChange={(event) => this.handleChange(event.target.value)}
               />
             </FormGroup>
             <FormControl.Feedback />
@@ -81,7 +93,7 @@ export default class App extends Component {
           <Modal.Footer className="center">
             <Button
               bsStyle="primary"
-              onClick={(event) => this.saveRecord()}
+              onClick={this.handleSubmit}
             >
               Submit
             </Button>

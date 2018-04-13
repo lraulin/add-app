@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import withAuthorization from 'components/auth/withAuthorization';
-import { db } from 'fb';
+import { dbAPI } from 'fb';
 
 class HomePage extends Component {
   constructor(props) {
@@ -12,7 +12,7 @@ class HomePage extends Component {
   }
 
   componentDidMount() {
-    db.onceGetUsers().then((snapshot) =>
+    dbAPI.onceGetUsers().then((snapshot) =>
       this.setState(() => ({
         users: snapshot.val(),
       })),
