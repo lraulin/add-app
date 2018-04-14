@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Button, Modal, FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
 import { dateStamp } from 'utils';
 import { auth, db } from 'fb/fb';
+import { getUser } from 'fb/auth';
+import { doSaveWaistRecord } from 'fb/dbAPI';
 
 export default class App extends Component {
   constructor() {
@@ -34,7 +36,7 @@ export default class App extends Component {
     console.log(newMeasurement);
     db.ref(`waist/${user}/${date}`).set({ cm: newMeasurement });
     this.setState({ showAdd: false });
-  };
+  }
 
   close = () => {
     if (this.state.showAdd) {
@@ -43,13 +45,13 @@ export default class App extends Component {
     if (this.state.showEdit) {
       this.setState({ showEdit: false });
     }
-  };
+  }
 
   open = (state, currentIndex) => {
     this.setState({ [state]: true });
     console.log(currentIndex);
     this.setState({ currentIndex });
-  };
+  }
 
   getValidationState() {
     if (Number.isNaN(this.state.newMeasurement)) return 'success';
@@ -57,18 +59,24 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    const user = auth.currentUser.uid;
-    console.log('Component Did Mount!');
-    const itemsRef = db.ref(`waist/${user}`);
-    console.log(JSON.stringify(itemsRef));
-    itemsRef.on('value', (snapshot) => {
-      let items = snapshot.val();
-      let newState = [];
-      for (let item in items) {
-        console.log(JSON.stringify(item));
-      }
-    });
-  };
+    const user = getUser();
+    if (user) {
+      console.log('Component Did Mount!');
+      const itemsRef = db.ref(`waist/${user}`);
+      itemsRef.on('value', (snapshot) => {
+        let items = snapshot.val();
+        let newState = [];
+        for (let item in items) {
+          newState.push({
+            date: item,
+            cm: items[item].cm,
+          });
+        }
+        this.setState({ data: newState });
+      });
+      console.log(JSON.stringify(this.state.data));
+    }
+  }
 
   render() {
     return (
@@ -99,6 +107,7 @@ export default class App extends Component {
             </Button>
           </Modal.Footer>
         </Modal>
+
 
         <Button bsStyle="primary" onClick={(event) => this.open('showAdd')}>
           New Measurement
